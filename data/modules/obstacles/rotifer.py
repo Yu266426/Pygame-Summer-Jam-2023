@@ -1,0 +1,127 @@
+import random
+from typing import TYPE_CHECKING
+
+import pygame
+import pygbase
+
+if TYPE_CHECKING:
+	from data.modules.player import Player
+
+
+class Cilium:
+	def __init__(self, parent: "Rotifer", offset: tuple):
+		self.parent = parent
+		self.offset = pygame.Vector2(offset)
+
+		self.pivot_point = pygame.Vector2(0, 15)
+
+		self.pos = self.parent.pos - self.offset
+
+		self.image: pygbase.Image = pygbase.ResourceManager.get_resource("image", "cilium")
+
+		self._angle = random.uniform(-50, 50)
+		if abs(self._angle) < 20:
+			self._angle *= (50 / self._angle) * 0.8
+
+		self.switch_timer = pygbase.Timer(random.uniform(0.03, 0.05), False, True)
+
+	@property
+	def angle(self):
+		return self._angle + self.parent.angle
+
+	def update(self, delta: float):
+		self.switch_timer.tick(delta)
+
+		if self.switch_timer.done():
+			self._angle *= -1
+
+		self.pos = self.parent.pos - self.offset.rotate(-self.parent.angle)
+
+	def draw(self, surface: pygame.Surface, camera: pygbase.Camera):
+		# pos = self.parent.pos - self.offset.rotate(-self.parent.angle)
+		image = self.image.get_image(self.angle)
+		# pos = self.parent.pos
+
+		# Local offset
+		rect = image.get_rect(center=self.pos)
+		offset = (-self.pivot_point).rotate(-self.angle)
+		rect = rect.move(offset)
+
+		surface.blit(image, camera.world_to_screen(rect.topleft))
+
+
+class Rotifer:
+	def __init__(self, pos: tuple, angle: float, particle_manager: pygbase.ParticleManager):
+		self.starting_pos = pos
+		self.starting_angle = angle
+
+		self.pos = pygame.Vector2(pos)
+		self.angle = angle
+
+		self.animation = pygbase.Animation("sprite_sheet", "rotifer", 0, 7)
+		self.animation.frame = random.randrange(0, 7)
+
+		self.cilia = [
+			Cilium(self, (-5, 120)),
+			Cilium(self, (-13, 128)),
+			Cilium(self, (-20, 140)),
+			Cilium(self, (-30, 140)),
+			Cilium(self, (-36, 140)),
+			Cilium(self, (5, 120)),
+			Cilium(self, (13, 128)),
+			Cilium(self, (20, 140)),
+			Cilium(self, (30, 140)),
+			Cilium(self, (36, 140))
+		]
+
+		self.attract_point_offset_1 = pygame.Vector2(-20, 140)
+		self.attract_point_offset_2 = pygame.Vector2(20, 140)
+		self.affector_point_offset = pygame.Vector2(0, 140)
+
+		self.attract_point_1 = self.pos - self.attract_point_offset_1.rotate(-self.angle)
+		self.attract_point_2 = self.pos - self.attract_point_offset_2.rotate(-self.angle)
+
+		self.affector_point = self.pos - self.affector_point_offset.rotate(-self.angle)
+		self.affector = particle_manager.add_affector(
+			pygbase.AffectorTypes.ATTRACTOR,
+			pygbase.ParticleAttractor(self.attract_point_1, 210, 4000).link_pos(self.attract_point_1)
+		)
+
+		self.player_attractor_scaling = 4000
+		self.affect_player_distance = 200
+
+	def update(self, delta: float, player: "Player"):
+		self.animation.change_frame(random.uniform(1, 3) * delta)
+
+		for cilium in self.cilia:
+			cilium.update(delta)
+
+		self.attract_point_1.update(self.pos - self.attract_point_offset_1.rotate(-self.angle))
+		to_player_vector_1 = self.attract_point_1 - player.pos
+		to_player_distance_1 = to_player_vector_1.length()
+		to_player_vector_1.normalize_ip()
+
+		self.attract_point_2.update(self.pos - self.attract_point_offset_2.rotate(-self.angle))
+		to_player_vector_2 = self.attract_point_2 - player.pos
+		to_player_distance_2 = to_player_vector_2.length()
+		to_player_vector_2.normalize_ip()
+
+		self.affector_point.update(self.pos - self.affector_point_offset.rotate(-self.angle))
+
+		if to_player_distance_1 < self.affect_player_distance and to_player_distance_1 != 0:
+			player.velocity += to_player_vector_1 * (self.player_attractor_scaling / to_player_distance_1) * delta
+		if to_player_distance_2 < self.affect_player_distance and to_player_distance_2 != 0:
+			player.velocity += to_player_vector_2 * (self.player_attractor_scaling / to_player_distance_2) * delta
+
+	def draw(self, surface: pygame.Surface, camera: pygbase.Camera, is_editor: bool = False):
+		if not is_editor:
+			self.animation.draw_at_pos(surface, self.pos - pygame.Vector2(0, -12), camera, angle=self.angle, pivot_point=(0, 76), draw_pos="midbottom")
+
+			for cilium in self.cilia:
+				cilium.draw(surface, camera)
+
+		else:
+			self.animation.draw_at_pos(surface, self.pos - pygame.Vector2(0, -12), camera, angle=self.angle, pivot_point=(0, 76), draw_pos="midbottom", flags=pygame.BLEND_ADD)
+
+		pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_1), 5)
+		pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_2), 5)

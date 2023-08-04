@@ -1,0 +1,26 @@
+{
+  "ciliate": {
+    "rows": 1,
+    "columns": 5,
+    "tile_width": 14,
+    "tile_height": 30,
+    "scale": 5,
+    "rotatable": true
+  },
+  "heliozoon": {
+    "rows": 1,
+    "columns": 4,
+    "tile_width": 14,
+    "tile_height": 14,
+    "scale": 5,
+    "rotatable": true
+  },
+  "rotifer": {
+    "rows": 1,
+    "columns": 7,
+    "tile_width": 20,
+    "tile_height": 35,
+    "scale": 5,
+    "rotatable": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "axopod": {
+    "scale": 5,
+    "rotatable": true
+  },
+  "cilium": {
+    "scale": 5,
+    "rotatable": true
+  },
+  "cyanobacterium": {
+    "scale": 5,
+    "rotatable": true
+  }
+}
