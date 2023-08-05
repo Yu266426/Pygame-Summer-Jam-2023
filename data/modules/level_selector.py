@@ -3,12 +3,9 @@ import random
 import pygame
 import pygbase
 
-from data.modules.events import END_EVENT_TYPE
-from data.modules.level import Level
 
-
-class Game(pygbase.GameState, name="game"):
-	def __init__(self, level_name: str):
+class LevelSelector(pygbase.GameState, name="level_selector"):
+	def __init__(self):
 		super().__init__()
 
 		self.background_colour = pygbase.Common.get_value("background_colour")
@@ -18,7 +15,7 @@ class Game(pygbase.GameState, name="game"):
 		self.particle_manager = pygbase.ParticleManager(chunk_size=50, show_debug=False)
 		self.ui_manager = pygbase.UIManager()
 
-		self.camera = pygbase.Camera(-self.screen_size / 2)
+		self.camera = pygbase.Camera()
 
 		self.lighting_manager.add_light(pygbase.Light(
 			self.screen_size / 2,
@@ -44,44 +41,45 @@ class Game(pygbase.GameState, name="game"):
 			)
 
 		self.particle_manager.add_spawner(pygbase.CircleSpawner(
-			self.camera.pos, 2, 100, 1100, True, "micro", self.particle_manager
-		).link_pos(self.camera.pos))
+			self.screen_size / 2, 2, 100, 1100, True, "micro", self.particle_manager
+		))
 
-		self.level = Level(level_name, self.camera, self.particle_manager, self.lighting_manager, self.ui_manager)
+		self.ui = pygbase.UIManager()
 
-		pygbase.EventManager.add_handler("game", END_EVENT_TYPE, self.end_event_handler)
+		self.selector_frame = self.ui.add_frame(
+			pygbase.Frame(
+				(pygbase.UIValue(0.1, False), pygbase.UIValue(0.1, False)),
+				(pygbase.UIValue(0.8, False), pygbase.UIValue(0.8, False)),
+				self.ui.base_container,
+				bg_colour=(0, 0, 0, 50)
+			)
+		)
 
-		self.level_ended = False
-		self.end_timer = pygbase.Timer(2, True, False)
-		self.switching_states = False
+		for level in range(pygbase.Common.get_value("num_levels")):
+			self.selector_frame.add_element(
+				pygbase.Button(
+					(pygbase.UIValue(0.05, False), pygbase.UIValue(0.05, False)),
+					(pygbase.UIValue(0.18, False), pygbase.UIValue(0)),
+					"image", "button",
+					self.selector_frame, self.switch_level, callback_args=(str(level + 1),),
+					text=str(level + 1), text_colour=(240, 240, 240)
+				), add_on_to_previous=(False, True)
+			)
 
-	def end_event_handler(self, event: pygame.Event):
-		self.level_ended = True
-		self.end_timer.start()
+	def switch_level(self, level_name: str):
+		from data.modules.game import Game
+
+		self.set_next_state(pygbase.FadeTransition(self, Game(level_name), 4, (0, 0, 0)))
 
 	def update(self, delta: float):
+		self.ui.update(delta)
 		self.lighting_manager.update(delta)
 		self.particle_manager.update(delta)
-		self.ui_manager.update(delta)
-
-		self.end_timer.tick(delta)
-
-		self.level.update(delta)
-
-		if self.level_ended and self.end_timer.done() and not self.switching_states:
-			from data.modules.level_selector import LevelSelector
-			self.set_next_state(pygbase.FadeTransition(self, LevelSelector(), 4, (0, 0, 0)))
-			self.switching_states = True
-
-		if pygbase.InputManager.get_key_just_pressed(pygame.K_ESCAPE):
-			pygbase.EventManager.post_event(pygame.QUIT)
 
 	def draw(self, surface: pygame.Surface):
 		surface.fill(self.background_colour)
+
 		self.particle_manager.draw(surface, self.camera)
-
-		self.level.draw(surface)
-
 		self.lighting_manager.draw(surface, self.camera)
 
-		self.ui_manager.draw(surface)
+		self.ui.draw(surface)

@@ -1,9 +1,10 @@
 import json
-import random
 
 import pygame
 import pygbase
 
+from data.modules.end_point import EndPoint
+from data.modules.events import END_EVENT_TYPE
 from data.modules.files import LEVEL_DIR
 from data.modules.obstacles.cyanobacterium import Cyanobacterium
 from data.modules.obstacles.heliozoon import Heliozoon
@@ -12,7 +13,7 @@ from data.modules.player import Player
 
 
 class Level:
-	def __init__(self, name: str, camera: pygbase.Camera, particle_manager: pygbase.ParticleManager, ui_manager: pygbase.UIManager):
+	def __init__(self, name: str, camera: pygbase.Camera, particle_manager: pygbase.ParticleManager, lighting_manager: pygbase.LightingManager, ui_manager: pygbase.UIManager):
 		self.screen_size = pygame.Vector2(pygbase.Common.get_value("screen_width"), pygbase.Common.get_value("screen_height"))
 
 		self.camera = camera
@@ -37,7 +38,7 @@ class Level:
 			)
 		)
 
-		# Load obstacles
+		# Load level
 		with open(LEVEL_DIR / f"{name}.json") as level_file:
 			data = json.load(level_file)
 
@@ -49,6 +50,10 @@ class Level:
 
 		for heliozoon in data["obstacles"]["cyanobacteria"]:
 			self.obstacles.append(Cyanobacterium(heliozoon[0], heliozoon[1]))
+
+		self.end_point = EndPoint(data["end_pos"], particle_manager, lighting_manager)
+
+		self.ended = False
 
 	def update(self, delta: float):
 		self.player.update(delta, self.obstacles)
@@ -67,6 +72,13 @@ class Level:
 				obstacle.update(delta, self.player)
 			else:
 				obstacle.update(delta)
+
+		if not self.ended:
+			for player_collider in self.player.colliders:
+				if player_collider.collides_with(self.end_point.collider):
+					pygbase.EventManager.post_event(END_EVENT_TYPE)
+					self.ended = True
+					self.player.ended = True
 
 	def draw(self, surface: pygame.Surface):
 		self.player.draw(surface, self.camera)

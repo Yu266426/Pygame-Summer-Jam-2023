@@ -35,6 +35,8 @@ class Player:
 		self.heliozoa_hurt_timer = pygbase.Timer(1.5, True, False)
 		self.rotifer_hurt_timer = pygbase.Timer(0.3, True, False)
 
+		self.ended = False
+
 	def get_inputs(self):
 		self.input.x = pygbase.InputManager.get_key_pressed(pygame.K_d) - pygbase.InputManager.get_key_pressed(pygame.K_a)
 		self.input.y = pygbase.InputManager.get_key_pressed(pygame.K_s) - pygbase.InputManager.get_key_pressed(pygame.K_w)
@@ -92,7 +94,10 @@ class Player:
 		self.heliozoa_hurt_timer.tick(delta)
 		self.rotifer_hurt_timer.tick(delta)
 
-		self.get_inputs()
+		if not self.ended:
+			self.get_inputs()
+		else:
+			self.input.update(0)
 
 		self.update_position(delta, obstacles)
 		self.update_angle(delta)

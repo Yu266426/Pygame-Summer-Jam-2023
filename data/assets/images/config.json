@@ -3,6 +3,10 @@
     "scale": 5,
     "rotatable": true
   },
+  "button": {
+    "scale": 1,
+    "rotatable": false
+  },
   "cilium": {
     "scale": 5,
     "rotatable": true

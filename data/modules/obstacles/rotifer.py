@@ -1,3 +1,4 @@
+import math
 import random
 from typing import TYPE_CHECKING
 
@@ -58,6 +59,10 @@ class Rotifer:
 		self.pos = pygame.Vector2(pos)
 		self.angle = angle
 
+		self.wave_offset = random.uniform(-10, 10)
+		self.wave_amount = random.uniform(4, 6)
+		self.wave_speed = random.uniform(800, 1200)
+
 		self.animation = pygbase.Animation("sprite_sheet", "rotifer", 0, 7)
 		self.animation.frame = random.randrange(0, 7)
 
@@ -113,6 +118,8 @@ class Rotifer:
 		if to_player_distance_2 < self.affect_player_distance and to_player_distance_2 != 0:
 			player.velocity += to_player_vector_2 * (self.player_attractor_scaling / to_player_distance_2) * delta
 
+		self.angle = self.starting_angle + math.sin(pygame.time.get_ticks() / self.wave_speed + self.wave_offset) * self.wave_offset
+
 	def draw(self, surface: pygame.Surface, camera: pygbase.Camera, is_editor: bool = False):
 		if not is_editor:
 			self.animation.draw_at_pos(surface, self.pos - pygame.Vector2(0, -12), camera, angle=self.angle, pivot_point=(0, 76), draw_pos="midbottom")
@@ -123,5 +130,5 @@ class Rotifer:
 		else:
 			self.animation.draw_at_pos(surface, self.pos - pygame.Vector2(0, -12), camera, angle=self.angle, pivot_point=(0, 76), draw_pos="midbottom", flags=pygame.BLEND_ADD)
 
-		pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_1), 5)
-		pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_2), 5)
+# pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_1), 5)
+# pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_2), 5)
