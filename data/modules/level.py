@@ -4,7 +4,7 @@ import pygame
 import pygbase
 
 from data.modules.end_point import EndPoint
-from data.modules.events import END_EVENT_TYPE
+from data.modules.events import END_EVENT_TYPE, WIN_EVENT_TYPE
 from data.modules.files import LEVEL_DIR
 from data.modules.obstacles.cyanobacterium import Cyanobacterium
 from data.modules.obstacles.heliozoon import Heliozoon
@@ -55,9 +55,21 @@ class Level:
 
 		self.ended = False
 
+	def end(self):
+		pygbase.EventManager.post_event(END_EVENT_TYPE)
+		self.ended = True
+		self.player.ended = True
+
+	@staticmethod
+	def win():
+		pygbase.EventManager.post_event(WIN_EVENT_TYPE)
+
 	def update(self, delta: float):
 		self.player.update(delta, self.obstacles)
 		self.player_health_bar.set_fill_percent(self.player.health / self.player.max_health)
+
+		if not self.ended and self.player.health <= 0:
+			self.end()
 
 		if self.camera_following:
 			self.camera.lerp_to_target(self.player.pos - self.screen_size / 2, 2 * delta)
@@ -69,16 +81,15 @@ class Level:
 
 		for obstacle in self.obstacles:
 			if isinstance(obstacle, Rotifer):
-				obstacle.update(delta, self.player)
+				obstacle.update(delta, [self.player])
 			else:
 				obstacle.update(delta)
 
 		if not self.ended:
 			for player_collider in self.player.colliders:
 				if player_collider.collides_with(self.end_point.collider):
-					pygbase.EventManager.post_event(END_EVENT_TYPE)
-					self.ended = True
-					self.player.ended = True
+					self.end()
+					self.win()
 
 	def draw(self, surface: pygame.Surface):
 		self.player.draw(surface, self.camera)

@@ -4,7 +4,7 @@
     "rotatable": true
   },
   "button": {
-    "scale": 1,
+    "scale": 5,
     "rotatable": false
   },
   "cilium": {
@@ -14,5 +14,9 @@
   "cyanobacterium": {
     "scale": 5,
     "rotatable": true
+  },
+  "large_button": {
+    "scale": 1,
+    "rotatable": false
   }
 }

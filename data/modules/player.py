@@ -19,6 +19,7 @@ class Player:
 		self.speed = 200
 
 		self.velocity = pygame.Vector2()
+		self.bounce = 0.7
 
 		self.input = pygame.Vector2()
 
@@ -55,7 +56,7 @@ class Player:
 			if isinstance(obstacle, Cyanobacterium):
 				if obstacle.line1.collides_with(self.colliders[0]) or obstacle.line2.collides_with(self.colliders[0]):
 					self.pos.x -= x_movement
-					self.velocity.x = 0
+					self.velocity.x *= -self.bounce
 
 		# Y movement
 		y_movement = self.velocity.y * delta + 0.5 * acceleration.y * (delta ** 2)
@@ -65,7 +66,7 @@ class Player:
 			if isinstance(obstacle, Cyanobacterium):
 				if obstacle.line1.collides_with(self.colliders[0]) or obstacle.line2.collides_with(self.colliders[0]):
 					self.pos.y -= y_movement
-					self.velocity.y = 0
+					self.velocity.y *= -self.bounce
 
 	def update_angle(self, delta: float):
 		velocity_angle = self.velocity.angle_to((0, -1)) % 360

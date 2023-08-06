@@ -92,31 +92,32 @@ class Rotifer:
 			pygbase.ParticleAttractor(self.attract_point_1, 210, 4000).link_pos(self.attract_point_1)
 		)
 
-		self.player_attractor_scaling = 4000
-		self.affect_player_distance = 200
+		self.entity_attractor_scaling = 4000
+		self.affect_entity_distance = 200
 
-	def update(self, delta: float, player: "Player"):
+	def update(self, delta: float, attracted_entities: list["Player"]):
 		self.animation.change_frame(random.uniform(1, 3) * delta)
 
 		for cilium in self.cilia:
 			cilium.update(delta)
 
-		self.attract_point_1.update(self.pos - self.attract_point_offset_1.rotate(-self.angle))
-		to_player_vector_1 = self.attract_point_1 - player.pos
-		to_player_distance_1 = to_player_vector_1.length()
-		to_player_vector_1.normalize_ip()
+		for attracted_entity in attracted_entities:
+			self.attract_point_1.update(self.pos - self.attract_point_offset_1.rotate(-self.angle))
+			to_player_vector_1 = self.attract_point_1 - attracted_entity.pos
+			to_player_distance_1 = to_player_vector_1.length()
+			to_player_vector_1.normalize_ip()
 
-		self.attract_point_2.update(self.pos - self.attract_point_offset_2.rotate(-self.angle))
-		to_player_vector_2 = self.attract_point_2 - player.pos
-		to_player_distance_2 = to_player_vector_2.length()
-		to_player_vector_2.normalize_ip()
+			self.attract_point_2.update(self.pos - self.attract_point_offset_2.rotate(-self.angle))
+			to_player_vector_2 = self.attract_point_2 - attracted_entity.pos
+			to_player_distance_2 = to_player_vector_2.length()
+			to_player_vector_2.normalize_ip()
 
-		self.affector_point.update(self.pos - self.affector_point_offset.rotate(-self.angle))
+			self.affector_point.update(self.pos - self.affector_point_offset.rotate(-self.angle))
 
-		if to_player_distance_1 < self.affect_player_distance and to_player_distance_1 != 0:
-			player.velocity += to_player_vector_1 * (self.player_attractor_scaling / to_player_distance_1) * delta
-		if to_player_distance_2 < self.affect_player_distance and to_player_distance_2 != 0:
-			player.velocity += to_player_vector_2 * (self.player_attractor_scaling / to_player_distance_2) * delta
+			if to_player_distance_1 < self.affect_entity_distance and to_player_distance_1 != 0:
+				attracted_entity.velocity += to_player_vector_1 * (self.entity_attractor_scaling / to_player_distance_1) * delta
+			if to_player_distance_2 < self.affect_entity_distance and to_player_distance_2 != 0:
+				attracted_entity.velocity += to_player_vector_2 * (self.entity_attractor_scaling / to_player_distance_2) * delta
 
 		self.angle = self.starting_angle + math.sin(pygame.time.get_ticks() / self.wave_speed + self.wave_offset) * self.wave_offset
 
@@ -132,3 +133,4 @@ class Rotifer:
 
 # pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_1), 5)
 # pygame.draw.circle(surface, "red", camera.world_to_screen(self.attract_point_2), 5)
+# pygame.draw.circle(surface, "orange", camera.world_to_screen(self.affector_point), 5)

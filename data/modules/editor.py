@@ -17,7 +17,7 @@ class Editor(pygbase.GameState, name="editor"):
 	def __init__(self):
 		super().__init__()
 
-		self.level_name = "2"
+		self.level_name = "5"
 
 		self.background_colour = pygbase.Common.get_value("background_colour")
 		self.screen_size = pygame.Vector2(pygbase.Common.get_value("screen_width"), pygbase.Common.get_value("screen_height"))
@@ -124,7 +124,7 @@ class Editor(pygbase.GameState, name="editor"):
 
 			logging.info("Saving Level")
 		else:
-			logging.warn("Cannot save level as end point does not exist")
+			logging.warning("Cannot save level as end point does not exist")
 
 	def update(self, delta: float):
 		self.ui.update(delta)
@@ -136,7 +136,7 @@ class Editor(pygbase.GameState, name="editor"):
 
 		for obstacle in self.obstacles:
 			if isinstance(obstacle, Rotifer):
-				obstacle.update(delta, Player((0, 0)))
+				obstacle.update(delta, [])
 			else:
 				obstacle.update(delta)
 

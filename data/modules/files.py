@@ -8,5 +8,7 @@ DATA_DIR = CURRENT_DIR / "data"
 ASSET_DIR = DATA_DIR / "assets"
 IMAGE_DIR = ASSET_DIR / "images"
 SPRITE_SHEET_DIR = ASSET_DIR / "sprite_sheets"
+SOUND_DIR = ASSET_DIR / "sounds"
+MUSIC_DIR = ASSET_DIR / "music"
 
 LEVEL_DIR = ASSET_DIR / "levels"

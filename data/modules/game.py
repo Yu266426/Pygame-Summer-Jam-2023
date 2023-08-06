@@ -1,10 +1,13 @@
+import json
 import random
 
 import pygame
 import pygbase
 
-from data.modules.events import END_EVENT_TYPE
+from data.modules.events import END_EVENT_TYPE, WIN_EVENT_TYPE
+from data.modules.files import DATA_DIR
 from data.modules.level import Level
+from data.modules.sound import SoundHandler
 
 
 class Game(pygbase.GameState, name="game"):
@@ -47,34 +50,71 @@ class Game(pygbase.GameState, name="game"):
 			self.camera.pos, 2, 100, 1100, True, "micro", self.particle_manager
 		).link_pos(self.camera.pos))
 
+		self.level_name = level_name
 		self.level = Level(level_name, self.camera, self.particle_manager, self.lighting_manager, self.ui_manager)
 
 		pygbase.EventManager.add_handler("game", END_EVENT_TYPE, self.end_event_handler)
+		pygbase.EventManager.add_handler("game", WIN_EVENT_TYPE, self.win_event_handler)
 
 		self.level_ended = False
+		self.level_won = False
 		self.end_timer = pygbase.Timer(2, True, False)
 		self.switching_states = False
+
+		SoundHandler.play_music("main")
 
 	def end_event_handler(self, event: pygame.Event):
 		self.level_ended = True
 		self.end_timer.start()
 
+	def win_event_handler(self, event: pygame.Event):
+		self.level_won = True
+
 	def update(self, delta: float):
 		self.lighting_manager.update(delta)
 		self.particle_manager.update(delta)
 		self.ui_manager.update(delta)
+		SoundHandler.update(delta)
 
 		self.end_timer.tick(delta)
 
 		self.level.update(delta)
 
 		if self.level_ended and self.end_timer.done() and not self.switching_states:
-			from data.modules.level_selector import LevelSelector
-			self.set_next_state(pygbase.FadeTransition(self, LevelSelector(), 4, (0, 0, 0)))
-			self.switching_states = True
+			to_win_screen = False
+
+			if self.level_won:
+				with open(DATA_DIR / "save.json", "r") as save_file:
+					data = json.load(save_file)
+
+				# Final level
+				if not data["completed"] and pygbase.Common.get_value("num_levels") == int(self.level_name):
+					data["completed"] = True
+
+					with open(DATA_DIR / "save.json", "w") as save_file:
+						save_file.write(json.dumps(data))
+
+					to_win_screen = True
+
+				# Unlock next level
+				elif pygbase.Common.get_value("available_levels") == int(self.level_name):
+					pygbase.Common.set_value("available_levels", int(self.level_name) + 1)
+					data["available_levels"] = int(self.level_name) + 1
+
+					with open(DATA_DIR / "save.json", "w") as save_file:
+						save_file.write(json.dumps(data))
+
+			if not to_win_screen:
+				from data.modules.level_selector import LevelSelector
+				self.set_next_state(pygbase.FadeTransition(self, LevelSelector(), 4, (0, 0, 0)))
+				self.switching_states = True
+			else:
+				from data.modules.win import Win
+				self.set_next_state(pygbase.FadeTransition(self, Win(), 4, (0, 0, 0)))
+				self.switching_states = True
 
 		if pygbase.InputManager.get_key_just_pressed(pygame.K_ESCAPE):
-			pygbase.EventManager.post_event(pygame.QUIT)
+			self.level.end()
 
 	def draw(self, surface: pygame.Surface):
 		surface.fill(self.background_colour)
