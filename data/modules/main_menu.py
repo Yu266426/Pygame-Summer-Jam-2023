@@ -25,7 +25,7 @@ class MainMenu(pygbase.GameState, name="main_menu"):
 
 		self.camera = pygbase.Camera(-self.screen_size / 2)
 
-		self.start_levels = ["start_1.json", "start_2.json"]
+		self.start_levels = ["start_1.json", "start_2.json", "start_3.json", "start_4.json"]
 		self.start_level = random.choice(self.start_levels)
 
 		self.obstacles = []
@@ -115,6 +115,7 @@ class MainMenu(pygbase.GameState, name="main_menu"):
 	def to_level_selector(self):
 		from data.modules.level_selector import LevelSelector
 		self.set_next_state(pygbase.FadeTransition(self, LevelSelector(), pygbase.Common.get_value("trans_time"), (0, 0, 0)))
+		SoundHandler.play_sound(random.choice(pygbase.Common.get_value("water_sounds")))
 
 	def update(self, delta: float):
 		self.ui_manager.update(delta)

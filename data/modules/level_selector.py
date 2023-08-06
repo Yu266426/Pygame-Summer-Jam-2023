@@ -53,7 +53,7 @@ class LevelSelector(pygbase.GameState, name="level_selector"):
 					(pygbase.UIValue(0.05, False), pygbase.UIValue(0.05, False)),
 					(pygbase.UIValue(0.9, False), pygbase.UIValue(0.108, False)),
 					"image", "button",
-					self.selector_frame, self.switch_level, callback_args=(str(level + 1),),
+					self.selector_frame, self.select_level, callback_args=(str(level + 1),),
 					text=str(level + 1), text_colour=(240, 240, 240),
 					font=ASSET_DIR / "fira_sans.ttf",
 					use_sys=False
@@ -95,15 +95,19 @@ class LevelSelector(pygbase.GameState, name="level_selector"):
 
 		SoundHandler.play_music("intro")
 
-	def switch_level(self, level_name: str):
+	def select_level(self, level_name: str):
 		from data.modules.game import Game
 
 		self.set_next_state(pygbase.FadeTransition(self, Game(level_name), pygbase.Common.get_value("trans_time"), (0, 0, 0)))
+
+		SoundHandler.play_sound(random.choice(pygbase.Common.get_value("water_sounds")))
 
 	def back_button_handler(self):
 		from data.modules.main_menu import MainMenu
 
 		self.set_next_state(pygbase.FadeTransition(self, MainMenu(), pygbase.Common.get_value("trans_time"), (0, 0, 0)))
+
+		SoundHandler.play_sound(random.choice(pygbase.Common.get_value("water_sounds")))
 
 	def update(self, delta: float):
 		self.ui_manager.update(delta)

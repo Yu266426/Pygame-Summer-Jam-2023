@@ -17,7 +17,7 @@ class Editor(pygbase.GameState, name="editor"):
 	def __init__(self):
 		super().__init__()
 
-		self.level_name = "5"
+		self.level_name = "start_4"
 
 		self.background_colour = pygbase.Common.get_value("background_colour")
 		self.screen_size = pygame.Vector2(pygbase.Common.get_value("screen_width"), pygbase.Common.get_value("screen_height"))

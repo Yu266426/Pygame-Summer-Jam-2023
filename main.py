@@ -53,7 +53,7 @@ if __name__ == '__main__':
 	profiler = cProfile.Profile()
 	# profiler.enable()
 
-	app = pygbase.App(MainMenu)
+	app = pygbase.App(MainMenu, title="CiliAdventure")
 	app.run()
 
 	# profiler.disable()

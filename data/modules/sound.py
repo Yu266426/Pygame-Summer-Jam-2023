@@ -23,7 +23,7 @@ class SoundHandler:
 		if cls.current_music != name:
 			if pygame.mixer.music.get_busy():
 				pygame.mixer.music.fadeout(400)
-				pygame.mixer.music.queue(MUSIC_DIR / f"{name}.wav")
+				pygame.mixer.music.queue(MUSIC_DIR / f"{name}.wav", loops=-1)
 			else:
 				pygame.mixer.music.load(MUSIC_DIR / f"{name}.wav")
 				pygame.mixer.music.set_volume(volume)

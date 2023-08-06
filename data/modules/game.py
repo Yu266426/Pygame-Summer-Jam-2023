@@ -114,7 +114,15 @@ class Game(pygbase.GameState, name="game"):
 				self.switching_states = True
 
 		if pygbase.InputManager.get_key_just_pressed(pygame.K_ESCAPE):
-			self.level.end()
+			self.level_ended = True
+			self.level.ended = True
+			self.level.player.ended = True
+
+			from data.modules.level_selector import LevelSelector
+			self.set_next_state(pygbase.FadeTransition(self, LevelSelector(), pygbase.Common.get_value("trans_time"), (0, 0, 0)))
+			self.switching_states = True
+
+			SoundHandler.play_sound(random.choice(pygbase.Common.get_value("water_sounds")))
 
 	def draw(self, surface: pygame.Surface):
 		surface.fill(self.background_colour)

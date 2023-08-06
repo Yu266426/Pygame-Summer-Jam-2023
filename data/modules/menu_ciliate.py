@@ -3,6 +3,7 @@ import random
 import pygame
 import pygbase
 
+from data.modules.cilium import Cilium
 from data.modules.colliders.circle_collider import CircleCollider
 from data.modules.obstacles.cyanobacterium import Cyanobacterium
 
@@ -27,6 +28,12 @@ class MenuCiliate:
 			CircleCollider(self.pos, 30).link_pos(self.pos),
 			CircleCollider(self.pos, 30).link_pos(self.collider_pos_1),
 			CircleCollider(self.pos, 30).link_pos(self.collider_pos_2)
+		]
+
+		self.cilia = [
+			Cilium(self, (0, -73), angle_offset=180),
+			Cilium(self, (0, -72), angle_offset=175),
+			Cilium(self, (0, -72), angle_offset=185)
 		]
 
 	def update_position(self, delta: float, obstacles: list):
@@ -77,5 +84,11 @@ class MenuCiliate:
 		self.update_position(delta, obstacles)
 		self.update_angle(delta)
 
+		for cilium in self.cilia:
+			cilium.update(delta)
+
 	def draw(self, surface: pygame.Surface, camera: pygbase.Camera):
 		self.animation.draw_at_pos(surface, self.pos, camera, angle=self.angle, draw_pos="center")
+
+		for cilium in self.cilia:
+			cilium.draw(surface, camera)

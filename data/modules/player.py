@@ -1,6 +1,7 @@
 import pygame
 import pygbase
 
+from data.modules.cilium import Cilium
 from data.modules.colliders.circle_collider import CircleCollider
 from data.modules.obstacles.cyanobacterium import Cyanobacterium
 from data.modules.obstacles.heliozoon import Heliozoon
@@ -33,8 +34,14 @@ class Player:
 
 		self.max_health = 50
 		self.health = 50
-		self.heliozoa_hurt_timer = pygbase.Timer(1.5, True, False)
+		self.heliozoa_hurt_timer = pygbase.Timer(1, True, False)
 		self.rotifer_hurt_timer = pygbase.Timer(0.3, True, False)
+
+		self.cilia = [
+			Cilium(self, (0, -73), angle_offset=180),
+			Cilium(self, (0, -72), angle_offset=175),
+			Cilium(self, (0, -72), angle_offset=185)
+		]
 
 		self.ended = False
 
@@ -103,6 +110,9 @@ class Player:
 		self.update_position(delta, obstacles)
 		self.update_angle(delta)
 
+		for cilium in self.cilia:
+			cilium.update(delta)
+
 		# Damage
 		if self.heliozoa_hurt_timer.done() and self.rotifer_hurt_timer.done():
 			for obstacle in obstacles:
@@ -120,6 +130,9 @@ class Player:
 
 	def draw(self, surface: pygame.Surface, camera: pygbase.Camera):
 		self.animation.draw_at_pos(surface, self.pos, camera, angle=self.angle, draw_pos="center")
+
+		for cilium in self.cilia:
+			cilium.draw(surface, camera)
 
 # for collider in self.colliders:
 # 	pygame.draw.circle(surface, "red", camera.world_to_screen(collider.pos), 30)

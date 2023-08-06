@@ -103,6 +103,8 @@ class Win(pygbase.GameState, name="win"):
 	def to_main_menu(self):
 		self.set_next_state(pygbase.FadeTransition(self, MainMenu(), pygbase.Common.get_value("trans_time"), (0, 0, 0)))
 
+		SoundHandler.play_sound(random.choice(pygbase.Common.get_value("water_sounds")))
+
 	def update(self, delta: float):
 		self.ui_manager.update(delta)
 		self.lighting_manager.update(delta)
