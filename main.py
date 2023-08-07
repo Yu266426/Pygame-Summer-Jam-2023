@@ -1,5 +1,6 @@
 import cProfile
 import json
+import logging
 
 import pygbase
 
@@ -8,7 +9,7 @@ from data.modules.files import SPRITE_SHEET_DIR, IMAGE_DIR, DATA_DIR, SOUND_DIR
 from data.modules.main_menu import MainMenu
 
 if __name__ == '__main__':
-	pygbase.init((800, 800), max_light_radius=798, light_radius_interval=2)
+	pygbase.init((800, 800), max_light_radius=798, light_radius_interval=2, logging_level=logging.INFO)
 
 	# Resources
 	pygbase.add_sprite_sheet_resource("sprite_sheet", 0, SPRITE_SHEET_DIR)
