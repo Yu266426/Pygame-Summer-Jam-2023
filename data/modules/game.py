@@ -18,7 +18,7 @@ class Game(pygbase.GameState, name="game"):
 		self.screen_size = pygame.Vector2(pygbase.Common.get_value("screen_width"), pygbase.Common.get_value("screen_height"))
 
 		self.lighting_manager = pygbase.LightingManager(0.4)
-		self.particle_manager = pygbase.ParticleManager(chunk_size=50, show_debug=False)
+		self.particle_manager = pygbase.ParticleManager(chunk_size=50)
 		self.ui_manager = pygbase.UIManager()
 
 		self.camera = pygbase.Camera(-self.screen_size / 2)
